@@ -17,13 +17,13 @@ export default function Breadcrumbs() {
             {breadcrumb.href && index < breadcrumbs.length - 1 ? (
               <Link
                 to={breadcrumb.href}
-                className="text-primary hover:text-primary-focus flex items-center gap-1"
+                className="text-primary hover:text-primary-focus flex gap-1"
               >
                 {breadcrumb.icon && <span>{breadcrumb.icon}</span>}
                 {breadcrumb.label}
               </Link>
             ) : (
-              <span className="flex items-center gap-1">
+              <span className="flex gap-1">
                 {breadcrumb.icon && <span>{breadcrumb.icon}</span>}
                 {breadcrumb.label}
               </span>

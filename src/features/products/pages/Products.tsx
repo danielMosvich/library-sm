@@ -83,8 +83,8 @@ function ProductVariantsTable({
                 <th className="">Marca</th>
                 <th className="text-center">SKU</th>
                 <th className="text-center">Código</th>
-                <th className="text-center">P. Compra</th>
                 <th className="text-center">P. Venta</th>
+                <th className="text-center">P. Compra</th>
                 <th className="text-center">Unidad</th>
                 <th className="text-center">Estado</th>
                 <th className="text-center">Acciones</th>
@@ -140,13 +140,12 @@ function ProductVariantsTable({
 
                   <td className="text-center">
                     <div className="text-sm font-bold text-success">
-                      s/ {variant.cost_price.toFixed(2)}
+                      s/ {variant.sale_price.toFixed(2)}
                     </div>
                   </td>
-
                   <td className="text-center">
-                    <div className="text-sm font-bold text-error">
-                      s/ {variant.sale_price.toFixed(2)}
+                    <div className="text-sm font-bold text-warning">
+                      s/ {variant.cost_price.toFixed(2)}
                     </div>
                   </td>
 
@@ -442,9 +441,11 @@ export default function Products() {
                     <div
                       onClick={() => toggleRowExpansion(product.id)}
                       className={clsx(
-                        "bg-base-200  w-full h-full absolute top-0 left-0 flex items-center justify-center",
+                        "w-full h-full absolute top-0 left-0 flex items-center justify-center",
                         {
-                          "bg-info text-base-300": isRowExpanded(product.id),
+                          "btn btn-info rounded-none": isRowExpanded(
+                            product.id
+                          ),
                         }
                       )}
                     >
@@ -463,21 +464,6 @@ export default function Products() {
                         />
                       </svg>
                     </div>
-                    {/* <button
-                      type="button"
-                      className={clsx(
-                        "btn btn-square border-base-content/30 btn-sm md:btn-md",
-                        {
-                          "btn-info": isRowExpanded(product.id),
-                        }
-                      )}
-                      onClick={() => toggleRowExpansion(product.id)}
-                      title={`${
-                        isRowExpanded(product.id) ? "Contraer" : "Expandir"
-                      } variantes`}
-                    >
-                      
-                    </button> */}
                   </td>
                   <td>
                     <div className="w-14 h-14 rounded-lg overflow-hidden bg-white">

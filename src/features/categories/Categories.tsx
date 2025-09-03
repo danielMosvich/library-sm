@@ -220,7 +220,7 @@ export default function Categories() {
   }
 
   return (
-    <div className="space-y-4 ">
+    <div className="space-y-4">
       <div>
         <h2 className="text-3xl font-black">Inventario</h2>
         <h3 className="text-xl label">Gestion el inventario</h3>
@@ -252,15 +252,15 @@ export default function Categories() {
               to={`/categories/${category.id}`}
               className="group"
             >
-              <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 border border-base-300 h-full">
+              <div className="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-base-300 h-full">
                 <figure className="md:max-h-52 md:min-h-52 max-h-32 min-h-32">
                   <img
-                    src={category.image_url || "/placeholder.png"}
+                    src={category.image_url || "/images/no-image.webp"}
                     alt={category.name}
                     className="w-full h-full object-cover"
                   />
                 </figure>
-                <div className="card-body">
+                <div className="card-body p-2 md:p-4">
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h2 className="card-title text-lg font-bold mb-2 group-hover:text-primary transition-colors">
@@ -339,7 +339,7 @@ export default function Categories() {
                     </Menu>
                   </div>
 
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mt-auto">
                     <div className="flex gap-2 flex-wrap">
                       {category.children_count > 0 && (
                         <span className="badge badge-primary badge-sm truncate">

@@ -10,6 +10,7 @@ import CategoryEdit from "../features/categories/CategoryEdit";
 import CategoryView from "../features/categories/CategoryView";
 import MainLayout from "../layout/main";
 import Home from "../features/home/pages/Home";
+import Profile from "../features/profile/pages/Profile";
 export default function Router() {
   const queryClient = new QueryClient();
   return (
@@ -30,6 +31,7 @@ export default function Router() {
               path="/categories/:id/subcategories/:subId"
               element={<CategoryView />}
             />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Routes>
       </BrowserRouter>
