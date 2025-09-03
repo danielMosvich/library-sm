@@ -3,10 +3,20 @@ import clsx from "clsx";
 import { Link } from "react-router";
 import { Fragment } from "react/jsx-runtime";
 import InventoryTable from "./InventoryTable";
+import { useBreadcrumbs } from "../../../hooks/useBreadcrumbs";
+import Icons from "../../../components/Icons";
 
 export default function Inventory() {
+  useBreadcrumbs([
+    { label: "Inicio", href: "/", icon: <Icons variant="home" /> },
+    {
+      label: "Inventario",
+      href: "/inventory",
+      icon: <Icons variant="inventory" />,
+    },
+  ]);
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 pb-10">
       <div>
         <h2 className="text-3xl font-black">Inventario</h2>
         <h3 className="text-xl label">Gestion el inventario</h3>

@@ -144,10 +144,10 @@ export default function InventoryTable() {
                 <td className="text-center">
                   <div className="kbd">{item.product_variant.sku || "N/A"}</div>
                 </td>
-                <td className="text-center font-black text-success">
+                <td className="text-center font-black text-success truncate">
                   <div className="kbd">{item.stock} Unidades</div>
                 </td>
-                <td className="text-center font-black text-warning">
+                <td className="text-center font-black text-warning truncate">
                   <div className="kbd">{item.min_stock} Unidades</div>
                 </td>
                 <td className="text-center">{item.location?.name || "N/A"}</td>
@@ -206,8 +206,8 @@ export default function InventoryTable() {
           </tbody>
         </table>
       </div>
-
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
+      {/* Paginación */}
+      <div className="flex flex-row justify-end items-center gap-4 fixed bottom-5 right-5 bg-base-200 border border-base-content/30 z-30 h-fit rounded-field pl-2">
         <div className="text-sm text-gray-600">
           Página {page} de {totalPages}
         </div>
@@ -219,7 +219,21 @@ export default function InventoryTable() {
             disabled={page === 1}
             aria-label="Ir a la página anterior"
           >
-            ←
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.3rem"
+              height="1.3rem"
+              viewBox="0 0 48 48"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="4"
+                d="M31 36L19 24l12-12"
+              />
+            </svg>
           </button>
           <button type="button" className="btn join-item">
             {page}
@@ -231,7 +245,21 @@ export default function InventoryTable() {
             disabled={page === totalPages}
             aria-label="Ir a la página siguiente"
           >
-            →
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.3rem"
+              height="1.3rem"
+              viewBox="0 0 48 48"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="4"
+                d="m19 12l12 12l-12 12"
+              />
+            </svg>
           </button>
         </div>
       </div>

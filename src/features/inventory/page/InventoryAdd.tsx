@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import supabase from "../../../supabase/config";
+import { useBreadcrumbs } from "../../../hooks/useBreadcrumbs";
+import Icons from "../../../components/Icons";
 
 interface Product {
   id: string;
@@ -28,6 +30,19 @@ interface InventoryFormData {
 }
 
 export default function InventoryAdd() {
+  useBreadcrumbs([
+    { label: "Inicio", href: "/", icon: <Icons variant="home" /> },
+    {
+      label: "Inventario",
+      href: "/inventory",
+      icon: <Icons variant="inventory" />,
+    },
+    {
+      label: "Agregar Inventario",
+      href: "/inventory/add",
+      icon: <Icons variant="add" />,
+    },
+  ]);
   const queryClient = useQueryClient();
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<InventoryFormData>({
@@ -255,6 +270,7 @@ export default function InventoryAdd() {
             <span className="label-text font-medium">Ubicación *</span>
           </label>
           <select
+            title="Seleccione una ubicación"
             value={formData.location_id}
             onChange={(e) => handleInputChange("location_id", e.target.value)}
             className="select select-bordered w-full"
@@ -341,6 +357,7 @@ export default function InventoryAdd() {
             <span className="label-text font-medium">Estado *</span>
           </label>
           <select
+            title="Seleccione un estado"
             value={formData.status}
             onChange={(e) => handleInputChange("status", e.target.value)}
             className="select select-bordered w-full"

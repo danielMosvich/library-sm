@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import type { TablesInsert } from "../../../../database.types"; // Ajusta la ruta según tu estructura
 import { Select } from "@headlessui/react";
 import { generateUniqueSKU } from "../../../utils/generateSku";
+import { useBreadcrumbs } from "../../../hooks/useBreadcrumbs";
+import Icons from "../../../components/Icons";
 
 // Tipos para el formulario
 interface ProductFormData {
@@ -96,6 +98,18 @@ export default function ProductAdd() {
   const watchVariants = watch("variants");
   const watchMainImage = watch("image_url");
 
+  useBreadcrumbs([
+    { label: "Inicio", href: "/", icon: <Icons variant="home" /> },
+    {
+      label: "Productos",
+      href: "/products",
+      icon: <Icons variant="products" />,
+    },
+    {
+      label: "Agregar Producto",
+      icon: <Icons variant="add" />,
+    },
+  ]);
   // Generar SKU único usando la función utilitaria
   const generateSKU = async (
     productName: string,

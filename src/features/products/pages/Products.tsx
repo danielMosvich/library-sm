@@ -16,6 +16,8 @@ import {
   PopoverButton,
   PopoverPanel,
 } from "@headlessui/react";
+import { useBreadcrumbs } from "../../../hooks/useBreadcrumbs";
+import Icons from "../../../components/Icons";
 
 type ProductWithVariants = Tables<"products"> & {
   variants: Tables<"product_variants">[];
@@ -218,6 +220,16 @@ export default function Products() {
   const [page, setPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
+  // Configurar breadcrumbs para la página de productos
+  useBreadcrumbs([
+    { label: "Inicio", href: "/", icon: <Icons variant="home" /> },
+    {
+      label: "Productos",
+      href: "/products",
+      icon: <Icons variant="products" />,
+    },
+  ]);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["products", page, productsPageSize],
     queryFn: () => fetchProductsPaginated({ page, pageSize: productsPageSize }),
@@ -310,13 +322,13 @@ export default function Products() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 pb-10">
       <div>
         <h2 className="text-3xl font-black">Gestion de Productos</h2>
         <h3 className="text-xl label">administra toda la lista de productos</h3>
       </div>
       {/* NAV */}
-      <div className="bg-base-200 border border-base-content/20 shadow-xl flex flex-col-reverse md:flex-row p-4 gap-4 rounded-box">
+      <div className="bg-base-200  border border-base-content/20 shadow-xl flex flex-col-reverse md:flex-row p-4 gap-4 rounded-box">
         <fieldset className="fieldset w-full md:w-1/2">
           <label className="fieldset-label">Buscar producto</label>
           <div className="input w-full overflow-hidden fieldset-content pr-0">
@@ -598,7 +610,7 @@ export default function Products() {
       </div>
 
       {/* Paginación */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4">
+      <div className="flex flex-row justify-end items-center gap-4 fixed bottom-5 right-5 bg-base-200 border border-base-content/30 z-30 h-fit rounded-field pl-2">
         <div className="text-sm text-gray-600">
           Página {page} de {totalPages}
         </div>
@@ -610,7 +622,21 @@ export default function Products() {
             disabled={page === 1}
             aria-label="Ir a la página anterior"
           >
-            ←
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.3rem"
+              height="1.3rem"
+              viewBox="0 0 48 48"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="4"
+                d="M31 36L19 24l12-12"
+              />
+            </svg>
           </button>
           <button type="button" className="btn join-item">
             {page}
@@ -622,7 +648,21 @@ export default function Products() {
             disabled={page === totalPages}
             aria-label="Ir a la página siguiente"
           >
-            →
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.3rem"
+              height="1.3rem"
+              viewBox="0 0 48 48"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="4"
+                d="m19 12l12 12l-12 12"
+              />
+            </svg>
           </button>
         </div>
       </div>
