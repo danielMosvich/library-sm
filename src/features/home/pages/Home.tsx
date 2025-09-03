@@ -13,6 +13,8 @@ export default function Home() {
             const text = result.getText();
             console.log(text);
             setData(text);
+          } else {
+            console.log("No se pudo escanear el código", err);
           }
         }}
       />
