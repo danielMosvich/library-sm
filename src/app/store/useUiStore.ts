@@ -19,6 +19,9 @@ export const themes: Theme[] = [
   { id: "dracula", name: "Dracula" },
   { id: "black", name: "Black" },
   { id: "cupcake", name: "Cupcake" },
+  { id: "lemonade", name: "Lemonade" },
+  { id: "synthwave", name: "Synthwave" },
+  { id: "forest", name: "Forest" },
 ];
 
 interface UiState {

@@ -7,6 +7,7 @@ type variant =
   | "settings"
   | "profile"
   | "left"
+  | "ai"
   | "right"
   | "logout";
 export default function Icons({
@@ -184,6 +185,24 @@ export default function Icons({
               d="M15.707 11.293a1 1 0 0 1 0 1.414l-5.657 5.657a1 1 0 1 1-1.414-1.414l4.95-4.95l-4.95-4.95a1 1 0 0 1 1.414-1.414z"
             />
           </g>
+        </svg>
+      );
+    case "ai":
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={defaultWidth}
+          height={defaultHeight}
+          viewBox="0 0 24 24"
+          className={className}
+        >
+          <path
+            fill="currentColor"
+            stroke="currentColor"
+            strokeLinejoin="round"
+            strokeWidth="1.5"
+            d="M8 15c4.875 0 7-2.051 7-7c0 4.949 2.11 7 7 7c-4.89 0-7 2.11-7 7c0-4.89-2.125-7-7-7ZM2 6.5c3.134 0 4.5-1.318 4.5-4.5c0 3.182 1.357 4.5 4.5 4.5c-3.143 0-4.5 1.357-4.5 4.5c0-3.143-1.366-4.5-4.5-4.5Z"
+          />
         </svg>
       );
     default:

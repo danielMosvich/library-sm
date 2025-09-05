@@ -4,6 +4,7 @@ import { useState } from "react";
 import supabase from "../../../supabase/config";
 import type { Tables } from "../../../../database.types";
 import { Link } from "react-router";
+import { useUiStore } from "../../../app/store/useUiStore";
 
 interface InventoryItem extends Tables<"inventory"> {
   product_variant: Tables<"product_variants"> & {
@@ -30,6 +31,7 @@ async function fetchInventory({
       "*, product_variant:product_variants(*, base_product:products(name, brand)), location:locations(name)",
       { count: "exact" }
     )
+    .order("created_at", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
   if (error) throw error;
@@ -42,7 +44,8 @@ async function fetchInventory({
 
 export default function InventoryTable() {
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  // const pageSize = 10;
+  const { productsPageSize: pageSize } = useUiStore();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["inventory", page, pageSize],
@@ -165,7 +168,8 @@ export default function InventoryTable() {
 
                 <td>
                   <div className="flex gap-2 justify-center">
-                    <button
+                    <Link
+                      to={`/inventory/${item.id}/edit`}
                       type="button"
                       className="btn btn-sm btn-soft btn-warning"
                       title="Editar inventario"
@@ -181,7 +185,7 @@ export default function InventoryTable() {
                           d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z"
                         />
                       </svg>
-                    </button>
+                    </Link>
                     <button
                       type="button"
                       className="btn btn-sm btn-soft btn-error"

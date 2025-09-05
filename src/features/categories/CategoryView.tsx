@@ -295,11 +295,7 @@ export default function CategoryView() {
           </div>
         </div>
         <Link
-          to="/categories/add"
-          state={{
-            parentId: currentCategory.id,
-            parentName: currentCategory.name,
-          }}
+          to={`/categories/add?parent=${currentCategory.id}`}
           className="btn btn-primary"
         >
           <span className="text-lg">+</span>
@@ -325,11 +321,7 @@ export default function CategoryView() {
             Esta categoría no tiene subcategorías aún
           </p>
           <Link
-            to="/categories/add"
-            state={{
-              parentId: currentCategory.id,
-              parentName: currentCategory.name,
-            }}
+            to={`/categories/add?parent=${currentCategory.id}`}
             className="btn btn-primary"
           >
             Crear primera subcategoría
