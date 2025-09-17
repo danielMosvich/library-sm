@@ -9,6 +9,7 @@ import TagsGenerator from "../../../../components/ai/TagsGenerator";
 import { useDebounce } from "../../../../hooks/useDebounce";
 import { generateUniqueSKU } from "../../../../utils/generateSku";
 import { toast } from "sonner";
+import CreateProduct from "../../../../models/products/CreateProduct";
 
 // Tipos para el formulario
 interface ProductFormData {
@@ -221,7 +222,23 @@ export default function ProductAddForm({
           onSubmit(data);
           return;
         }
-
+        const productBase = {
+          name: data.name,
+          brand: data.brand,
+          category_id: data.category_id || null,
+          description: data.description || null,
+          image_url: data.image_url || null,
+          tags: data.tags || null,
+        };
+        const variants = fields.map((variant) => ({
+          variant_name: variant.variant_name,
+          barcode: variant.barcode || null,
+          image_url: variant.image_url || null,
+          cost_price: variant.cost_price,
+          sale_price: variant.sale_price,
+        }));
+        CreateProduct(productBase, variants);
+        return;
         // Crear el producto en Supabase
         const { data: productData, error: productError } = await supabase
           .from("products")

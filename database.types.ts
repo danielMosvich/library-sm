@@ -64,6 +64,30 @@ export type Database = {
           },
         ]
       }
+      colors: {
+        Row: {
+          active: boolean
+          alt_names: string[] | null
+          hex_code: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          alt_names?: string[] | null
+          hex_code?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          active?: boolean
+          alt_names?: string[] | null
+          hex_code?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       inventory: {
         Row: {
           created_at: string
@@ -151,11 +175,30 @@ export type Database = {
         }
         Relationships: []
       }
+      materials: {
+        Row: {
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
       product_variants: {
         Row: {
           active: boolean
           barcode: string | null
           base_product_id: string
+          color_id: number | null
           cost_price: number
           created_at: string
           created_by: string | null
@@ -165,16 +208,20 @@ export type Database = {
           exchange_rate: number
           id: string
           image_url: string | null
+          material_id: number | null
           sale_price: number
+          search_text: string | null
+          size_id: number | null
           sku: string
+          unit: string
           updated_at: string
           updated_by: string | null
-          variant_name: string
         }
         Insert: {
           active?: boolean
           barcode?: string | null
           base_product_id?: string
+          color_id?: number | null
           cost_price?: number
           created_at?: string
           created_by?: string | null
@@ -184,16 +231,20 @@ export type Database = {
           exchange_rate?: number
           id?: string
           image_url?: string | null
+          material_id?: number | null
           sale_price?: number
+          search_text?: string | null
+          size_id?: number | null
           sku: string
+          unit: string
           updated_at?: string
           updated_by?: string | null
-          variant_name: string
         }
         Update: {
           active?: boolean
           barcode?: string | null
           base_product_id?: string
+          color_id?: number | null
           cost_price?: number
           created_at?: string
           created_by?: string | null
@@ -203,11 +254,14 @@ export type Database = {
           exchange_rate?: number
           id?: string
           image_url?: string | null
+          material_id?: number | null
           sale_price?: number
+          search_text?: string | null
+          size_id?: number | null
           sku?: string
+          unit?: string
           updated_at?: string
           updated_by?: string | null
-          variant_name?: string
         }
         Relationships: [
           {
@@ -215,6 +269,27 @@ export type Database = {
             columns: ["base_product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_color_id_fkey"
+            columns: ["color_id"]
+            isOneToOne: false
+            referencedRelation: "colors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_size_id_fkey"
+            columns: ["size_id"]
+            isOneToOne: false
+            referencedRelation: "sizes"
             referencedColumns: ["id"]
           },
         ]
@@ -280,6 +355,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sizes: {
+        Row: {
+          description: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
       }
     }
     Views: {
