@@ -201,10 +201,7 @@ export type Database = {
           color_id: number | null
           cost_price: number
           created_at: string
-          created_by: string | null
           currency: string | null
-          deleted_at: string | null
-          deleted_by: string | null
           exchange_rate: number
           id: string
           image_url: string | null
@@ -215,7 +212,6 @@ export type Database = {
           sku: string
           unit: string
           updated_at: string
-          updated_by: string | null
         }
         Insert: {
           active?: boolean
@@ -224,10 +220,7 @@ export type Database = {
           color_id?: number | null
           cost_price?: number
           created_at?: string
-          created_by?: string | null
           currency?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
           exchange_rate?: number
           id?: string
           image_url?: string | null
@@ -238,7 +231,6 @@ export type Database = {
           sku: string
           unit: string
           updated_at?: string
-          updated_by?: string | null
         }
         Update: {
           active?: boolean
@@ -247,10 +239,7 @@ export type Database = {
           color_id?: number | null
           cost_price?: number
           created_at?: string
-          created_by?: string | null
           currency?: string | null
-          deleted_at?: string | null
-          deleted_by?: string | null
           exchange_rate?: number
           id?: string
           image_url?: string | null
@@ -261,7 +250,6 @@ export type Database = {
           sku?: string
           unit?: string
           updated_at?: string
-          updated_by?: string | null
         }
         Relationships: [
           {
