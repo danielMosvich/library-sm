@@ -10,7 +10,14 @@ interface ProductState {
   toggleAiOptions: () => void;
   toggleDefaultPrices: () => void;
   addVariant: (variant: ProductVariant) => void;
-  // removeVariant: (id: string) => void;
+  removeVariant: (id: number) => void;
+
+  // EDIT VARIANT
+  currentEditVariant: ProductVariant | null;
+  setCurrentEditVariant: (variant: ProductVariant | null) => void;
+  updateVariant: (variant: ProductVariant) => void;
+  modalMode: "create" | "edit";
+  changeModalMode: (mode: "create" | "edit") => void;
 }
 interface ProductVariant {
   idx: number;
@@ -38,7 +45,8 @@ export const useProductStore = create<ProductState>()(
         aiOptionsEnabled: true,
         defaultPricesEnabled: false,
         isLoading: false,
-
+        currentEditVariant: null,
+        modalMode: "create",
         //*ACTIONS ABOUT SETTINGS
         toggleAiOptions: () =>
           set((state) => ({ aiOptionsEnabled: !state.aiOptionsEnabled })),
@@ -46,14 +54,25 @@ export const useProductStore = create<ProductState>()(
           set((state) => ({
             defaultPricesEnabled: !state.defaultPricesEnabled,
           })),
-
         //?ACTIONS ABOUT VARIANTS
         addVariant: (variant: ProductVariant) =>
           set((state) => ({ variants: [...state.variants, variant] })),
-        // removeVariant: (idx: number) =>
-        //   set((state) => ({
-        //     variants: state.variants.filter((variant) => variant.idx !== id),
-        //   })),
+        removeVariant: (id: number) =>
+          set((state) => ({
+            variants: state.variants.filter((v) => v.idx !== id),
+          })),
+
+        // EDIT VARIANT
+        changeModalMode: (mode: "create" | "edit") =>
+          set(() => ({ modalMode: mode })),
+        setCurrentEditVariant: (variant: ProductVariant | null) =>
+          set(() => ({ currentEditVariant: variant })),
+        updateVariant: (variant: ProductVariant) =>
+          set((state) => ({
+            variants: state.variants.map((v) =>
+              v.idx === variant.idx ? variant : v
+            ),
+          })),
       }),
       {
         name: "product-settings",

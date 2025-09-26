@@ -6,12 +6,11 @@ import { useProductStore } from "../../../../app/store/product/useProductStore";
 import { CreateVariant } from "../../../../models/products/CreateProduct";
 import { toast } from "sonner";
 import clsx from "clsx";
-// import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 interface IFormInput {
   unit: string;
   exchange_rate: number;
   color_id: number | null;
-  sku: string;
   barcode: string;
   cost_price: number;
   sale_price: number | null;
@@ -22,17 +21,32 @@ interface IFormInput {
   inventoryLocationId: string | null;
   inventorySection: string | null;
 }
-export default function ModalVariant() {
-  const { addVariant, variants } = useProductStore();
+export default function ModalVariant({
+  defaultImage,
+  defaultPrices,
+}: {
+  defaultImage?: string;
+  defaultPrices: {
+    cost_price: number;
+    sale_price: number;
+  };
+}) {
+  const {
+    addVariant,
+    defaultPricesEnabled,
+    modalMode,
+    currentEditVariant,
+    updateVariant,
+    setCurrentEditVariant,
+  } = useProductStore();
   const formVariants = useForm<IFormInput>({
     defaultValues: {
       unit: "unidad",
       exchange_rate: 1,
       color_id: null as number | null,
-      sku: "",
       barcode: "",
       cost_price: 0,
-      sale_price: null,
+      sale_price: 0,
       image_url: "/images/no-image.webp",
 
       hasInventory: false,
@@ -51,6 +65,57 @@ export default function ModalVariant() {
     formState: { errors },
   } = formVariants;
 
+  const resetForm = useCallback(() => {
+    setValue("unit", "unidad");
+    setValue("exchange_rate", 1);
+    setValue("color_id", null);
+    setValue("barcode", "");
+    setValue("cost_price", 0);
+    setValue("sale_price", 0);
+    setValue("image_url", "/images/no-image.webp");
+    setValue("hasInventory", false);
+    setValue("inventoryStock", 1);
+    setValue("inventoryMinStock", 1);
+    setValue("inventoryLocationId", "");
+    setValue("inventorySection", "");
+  }, [setValue]);
+  // Actualizar precios cuando cambien los defaultPrices del store
+  useEffect(() => {
+    if (modalMode === "create") {
+      resetForm();
+
+      if (defaultPricesEnabled) {
+        setValue("cost_price", defaultPrices.cost_price);
+        setValue("sale_price", defaultPrices.sale_price);
+      } else {
+        setValue("cost_price", 0);
+        setValue("sale_price", 0);
+      }
+      if (defaultImage) {
+        setValue("image_url", defaultImage);
+      }
+    }
+    if (modalMode === "edit" && currentEditVariant) {
+      setValue("unit", currentEditVariant.unit);
+      setValue("exchange_rate", currentEditVariant.exchange_rate);
+      setValue("color_id", currentEditVariant.color_id || null);
+      setValue("barcode", currentEditVariant.barcode || "");
+      setValue("cost_price", currentEditVariant.cost_price);
+      setValue("sale_price", currentEditVariant.sale_price || 0);
+      setValue(
+        "image_url",
+        currentEditVariant.image_url || "/images/no-image.webp"
+      );
+    }
+  }, [
+    defaultPrices,
+    defaultPricesEnabled,
+    setValue,
+    defaultImage,
+    modalMode,
+    resetForm,
+    currentEditVariant,
+  ]);
   const {
     data: locations,
     isLoading,
@@ -69,31 +134,73 @@ export default function ModalVariant() {
   });
 
   const onSubmit = handleSubmit((data) => {
-    const { ok, variant } = CreateVariant({
-      idx: variants.length,
-      image_url: data.image_url || null,
-      unit: data.unit,
-      exchange_rate: data.exchange_rate,
-      color_id: data.color_id || null,
-      barcode: data.barcode || null,
-      cost_price: data.cost_price,
-      sale_price: data.sale_price || 0,
+    if (modalMode === "create") {
+      const { ok, variant } = CreateVariant({
+        idx: Date.now(), // Usar timestamp único
+        image_url: data.image_url || null,
+        unit: data.unit,
+        exchange_rate: data.exchange_rate,
+        color_id: data.color_id || null,
+        barcode: data.barcode || null,
+        cost_price: data.cost_price,
+        sale_price: data.sale_price || 0,
 
-      hasInventory: data.hasInventory,
-      stock: data.inventoryStock,
-      min_stock: data.inventoryMinStock || 0,
-      location_id: data.inventoryLocationId || null,
-      section: data.inventorySection || null,
-    });
-    if (ok) {
-      addVariant(variant);
-      reset();
-      toast.success("Variante agregada");
+        hasInventory: data.hasInventory,
+        stock: data.inventoryStock,
+        min_stock: data.inventoryMinStock || 0,
+        location_id: data.inventoryLocationId || null,
+        section: data.inventorySection || null,
+      });
+      if (ok) {
+        addVariant(variant);
+
+        // Reset personalizado que mantiene valores contextuales
+        reset({
+          unit: "unidad",
+          exchange_rate: 1,
+          color_id: null,
+          barcode: "",
+          cost_price: defaultPricesEnabled ? defaultPrices.cost_price : 0,
+          sale_price: defaultPricesEnabled ? defaultPrices.sale_price : 0,
+          image_url: defaultImage || "/images/no-image.webp",
+          hasInventory: false,
+          inventoryStock: 1,
+          inventoryMinStock: 1,
+          inventoryLocationId: "",
+          inventorySection: "",
+        });
+
+        toast.success("Variante agregada");
+        HTMLDialogElement.prototype.close.call(
+          document.getElementById("add_variant_modal") as HTMLDialogElement
+        );
+      } else {
+        toast.error("Error al agregar variante: " + variant);
+      }
+    }
+    if (modalMode === "edit" && currentEditVariant) {
+      updateVariant({
+        idx: currentEditVariant.idx, // Usar timestamp único
+        image_url: data.image_url || null,
+        unit: data.unit,
+        exchange_rate: data.exchange_rate,
+        color_id: data.color_id || null,
+        barcode: data.barcode || null,
+        cost_price: data.cost_price,
+        sale_price: data.sale_price || 0,
+
+        hasInventory: data.hasInventory,
+        stock: data.inventoryStock,
+        min_stock: data.inventoryMinStock || 0,
+        location_id: data.inventoryLocationId || null,
+        section: data.inventorySection || null,
+      });
+      resetForm();
+      toast.success("Variante actualizada");
       HTMLDialogElement.prototype.close.call(
         document.getElementById("add_variant_modal") as HTMLDialogElement
       );
-    } else {
-      toast.error("Error al agregar variante: " + variant);
+      setCurrentEditVariant(null);
     }
   });
   return (
@@ -204,7 +311,7 @@ export default function ModalVariant() {
                 type="number"
                 className="input w-full"
                 min="0"
-                step="0.01"
+                step="0.5"
                 placeholder="0"
                 {...register("cost_price", {
                   valueAsNumber: true,
@@ -225,7 +332,7 @@ export default function ModalVariant() {
                   errors.sale_price && "input-error"
                 )}
                 min="0"
-                step="0.01"
+                step="0.5"
                 placeholder="0.00"
                 {...register("sale_price", {
                   required: true,

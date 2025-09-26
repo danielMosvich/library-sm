@@ -7,14 +7,14 @@ import supabase from "../../../../supabase/config";
 import CategoryGenerator from "../../../../components/ai/CategoryGenerator";
 import TagsGenerator from "../../../../components/ai/TagsGenerator";
 // import { toast } from "sonner";
-import type { ProductFormData } from "../../../../types/productAdd";
+// import type { ProductFormData } from "../../../../types/productAdd";
 import { useProductStore } from "../../../../app/store/product/useProductStore";
 import ModalVariant from "./modalVariant";
 import Icons from "../../../../components/Icons";
 // Tipos para el modal de variantes
-interface ProductAddFormProps {
-  onSubmit?: (data: ProductFormData) => void;
-}
+// interface ProductAddFormProps {
+//   onSubmit?: (data: ProductFormData) => void;
+// }
 interface IFormInput {
   name: string;
   brand: string;
@@ -49,7 +49,7 @@ export default function ProductAddForm() {
       brand: "generica",
       category_id: "",
       description: "",
-      image_url: "/img/default-product.png",
+      image_url: "/images/no-image.webp",
       tags: "",
     },
   });
@@ -57,13 +57,20 @@ export default function ProductAddForm() {
   const watchedBrand = watch("brand");
   const watchedCategoryId = watch("category_id");
   // ?ZUSTAND STORE
-  const { variants, aiOptionsEnabled, defaultPricesEnabled } =
-    useProductStore();
+  const {
+    variants,
+    aiOptionsEnabled,
+    defaultPricesEnabled,
+    removeVariant,
+    changeModalMode,
+    setCurrentEditVariant,
+    modalMode,
+  } = useProductStore();
 
   //*!Estados locales
   const [defaultPrices, setDefaultPrices] = useState({
-    cost_price: "",
-    sale_price: "",
+    cost_price: 0,
+    sale_price: 0,
   });
   //* Querys
   const { data: categories = [], isLoading: loadingCategories } = useQuery({
@@ -106,7 +113,30 @@ export default function ProductAddForm() {
         {/* INFORMACIÓN DEL PRODUCTO */}
         <fieldset className="fieldset bg-base-300 rounded-box p-2 md:p-4">
           <legend className="fieldset-legend">Información del Producto</legend>
-
+          {/* IMAGEN */}
+          <div className="grid grid-cols-2 gap-2 md:gap-4">
+            <fieldset className="fieldset w-full">
+              <label className="fieldset-label">URL de Imagen Principal</label>
+              <input
+                title="URL de imagen del producto"
+                type="text"
+                className="input w-full"
+                placeholder="https://ejemplo.com/imagen.jpg"
+                {...register("image_url")}
+                onFocus={(e) => e.target.select()}
+              />
+            </fieldset>
+            <div className="flex skeleton w-full max-h-40 min-h-52 overflow-hidden rounded-box shadow-lg">
+              {watch("image_url") !== "" && (
+                <img
+                  className="w-full h-full  object-cover"
+                  src={watch("image_url")}
+                  alt="image"
+                />
+              )}
+            </div>
+          </div>
+          {/* NOMBRE - MARCA */}
           <div className="grid grid-cols-2 gap-2 md:gap-4">
             <fieldset className="fieldset w-full">
               <label className="fieldset-label">Nombre</label>
@@ -150,7 +180,7 @@ export default function ProductAddForm() {
               )}
             </fieldset>
           </div>
-
+          {/* CATEGORIA - DESCRIPCION */}
           <div className="grid grid-cols-2 gap-2 md:gap-4">
             <fieldset className="fieldset w-full">
               <label className="fieldset-label">Categoría</label>
@@ -192,19 +222,8 @@ export default function ProductAddForm() {
               />
             </fieldset>
           </div>
-
-          <div className="grid grid-cols-2 gap-2 md:gap-4">
-            <fieldset className="fieldset w-full">
-              <label className="fieldset-label">URL de Imagen Principal</label>
-              <input
-                title="URL de imagen del producto"
-                type="text"
-                className="input w-full"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                {...register("image_url")}
-              />
-            </fieldset>
-
+          {/* TAGS */}
+          <div className="grid grid-cols-1 gap-2 md:gap-4">
             <fieldset className="fieldset w-full">
               <label className="fieldset-label">
                 Tags (separados por coma)
@@ -240,16 +259,17 @@ export default function ProductAddForm() {
                 </label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="0.5"
                   className="input w-full"
                   value={defaultPrices.cost_price}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setDefaultPrices({
                       ...defaultPrices,
-                      cost_price: e.target.value,
-                    })
-                  }
+                      cost_price: Number(e.target.value),
+                    });
+                  }}
                   placeholder="0.00"
+                  onFocus={(e) => e.target.select()}
                 />
               </fieldset>
               <fieldset className="fieldset">
@@ -258,16 +278,17 @@ export default function ProductAddForm() {
                 </label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="0.5"
                   className="input w-full"
                   value={defaultPrices.sale_price}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setDefaultPrices({
                       ...defaultPrices,
-                      sale_price: e.target.value,
-                    })
-                  }
+                      sale_price: Number(e.target.value),
+                    });
+                  }}
                   placeholder="0.00"
+                  onFocus={(e) => e.target.select()}
                 />
               </fieldset>
             </div>
@@ -281,6 +302,8 @@ export default function ProductAddForm() {
             <div className="w-full">
               <button
                 onClick={() => {
+                  changeModalMode("create");
+                  setCurrentEditVariant(null);
                   (
                     document.getElementById(
                       "add_variant_modal"
@@ -293,60 +316,106 @@ export default function ProductAddForm() {
               >
                 Agregar Variante <Icons variant="add" />
               </button>
-              {variants.map((item, index) => {
-                return (
-                  <div
-                    className="grid grid-cols-[80px_1fr] gap-4 items-center bg-base-300 rounded-box mt-3"
-                    key={"variant-" + index}
-                  >
-                    <div className="w-full h-full overflow-hidden rounded-selector">
-                      <img
-                        className="w-full h-full object-cover"
-                        src={
-                          item.image_url
-                            ? item.image_url
-                            : "/images/no-image.webp"
-                        }
-                        alt=""
-                      />
-                    </div>
-                    <div className="flex items-center pr-4 justify-between w-full overflow-x-hidden">
-                      <div className="min-w-0">
-                        <div className="relative text-sm flex flex-col gap-1 py-2">
-                          <h4 className="font-bold first-letter:uppercase truncate">
-                            {watchedName}
-                          </h4>
-                          <h5 className="capitalize truncate">
-                            {watchedBrand}
-                          </h5>
-                          <span className="badge badge-warning font-bold">
-                            {item.unit}
-                          </span>
-                        </div>
+              <div className="grid sm:grid-cols-2 gap-4 lg:grid-cols-1">
+                {variants.map((item, index) => {
+                  return (
+                    <div
+                      className="grid lg:grid-cols-[150px_1fr_auto] lg:gap-4 items-center bg-base-300 border border-base-content/20 rounded-box mt-3 relative"
+                      key={"variant-" + index}
+                    >
+                      <div className="w-full h-[150px] overflow-hidden rounded-selector shadow-xl">
+                        <img
+                          className="w-full h-full object-cover"
+                          src={
+                            item.image_url
+                              ? item.image_url
+                              : "/images/no-image.webp"
+                          }
+                          alt=""
+                        />
                       </div>
-                      <div className="flex-shrink-0">
-                        {colors && item.color_id && (
-                          <div className="flex flex-col items-center gap-2 font-semibold">
-                            <div
-                              className="tooltip tooltip-left"
-                              data-tip={colors[item.color_id - 1]?.name}
-                            >
-                              <div
-                                style={{
-                                  backgroundColor:
-                                    colors[item.color_id - 1]?.hex_code ||
-                                    "#ffffff",
-                                }}
-                                className="w-8 h-8 border border-base-content/30 rounded-full"
-                              ></div>
+                      <div className="p-4 lg:p-0 flex items-center pr-4 justify-between w-full overflow-x-hidden">
+                        <div className="min-w-0">
+                          <div className="relative text-sm flex flex-col gap-1 py-2">
+                            <h4 className="font-bold first-letter:uppercase truncate">
+                              {watchedName}
+                            </h4>
+                            <h5 className="capitalize truncate">
+                              {watchedBrand}
+                            </h5>
+                            <div className="flex gap-2 flex-wrap">
+                              <span className="badge badge-info font-bold truncate">
+                                {item.unit}
+                              </span>
+                              <span className="badge badge-info badge-soft font-bold truncate">
+                                {item.exchange_rate} UND
+                              </span>
                             </div>
                           </div>
-                        )}
+                        </div>
+                        <div className="flex-shrink-0">
+                          {colors && item.color_id && (
+                            <div className="flex flex-col items-center gap-2 font-semibold">
+                              <div
+                                className="tooltip tooltip-left"
+                                data-tip={colors[item.color_id - 1]?.name}
+                              >
+                                <div
+                                  style={{
+                                    backgroundColor:
+                                      colors[item.color_id - 1]?.hex_code ||
+                                      "#ffffff",
+                                  }}
+                                  className="w-8 h-8 border border-base-content/30 rounded-full"
+                                ></div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex flex-col px-4 pb-4 lg:p-4">
+                        <div className="badge badge-soft block badge-warning font-bold mt-1">
+                          Compra: s/ {item.cost_price.toFixed(2)}
+                        </div>
+                        <div className="badge badge-soft block badge-success font-bold mt-1">
+                          Venta: s/ {item.sale_price.toFixed(2)}
+                        </div>
+                      </div>
+
+                      {/* ACTIONS */}
+                      <div className="absolute top-1 right-1 flex gap-1">
+                        <button
+                          title="Editar Variante"
+                          type="button"
+                          className="btn btn-xs btn-square btn-warning"
+                          onClick={() => {
+                            changeModalMode("edit");
+                            setCurrentEditVariant(item);
+                            (
+                              document.getElementById(
+                                "add_variant_modal"
+                              ) as HTMLDialogElement
+                            )?.showModal();
+                          }}
+                        >
+                          <Icons variant="edit" width="1rem" height="1rem" />
+                        </button>
+                        <button
+                          title="Eliminar Variante"
+                          type="button"
+                          className="btn btn-xs btn-square btn-error"
+                          onClick={() => {
+                            // Handle delete variant
+                            removeVariant(item.idx);
+                          }}
+                        >
+                          <Icons variant="close" />
+                        </button>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           ) : (
             <div className="w-full h-full flex justify-center items-center">
@@ -354,12 +423,15 @@ export default function ProductAddForm() {
                 type="button"
                 className="btn btn-success mb-5"
                 onClick={() => {
+                  changeModalMode("create");
+                  setCurrentEditVariant(null);
                   (
                     document.getElementById(
                       "add_variant_modal"
                     ) as HTMLDialogElement
                   )?.showModal();
                 }}
+                disabled={!isValid}
               >
                 Agregar Variante <Icons variant="add" />
               </button>
@@ -383,7 +455,11 @@ export default function ProductAddForm() {
 
         {/* MODAL PARA AGREGAR/EDITAR VARIANTES */}
       </form>
-      <ModalVariant />
+      {modalMode}
+      <ModalVariant
+        defaultImage={watch("image_url")}
+        defaultPrices={defaultPrices}
+      />
     </>
   );
 }
