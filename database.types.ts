@@ -68,23 +68,29 @@ export type Database = {
         Row: {
           active: boolean
           alt_names: string[] | null
+          category: string | null
           hex_code: string | null
           id: number
           name: string
+          order_index: number | null
         }
         Insert: {
           active?: boolean
           alt_names?: string[] | null
+          category?: string | null
           hex_code?: string | null
           id?: number
           name: string
+          order_index?: number | null
         }
         Update: {
           active?: boolean
           alt_names?: string[] | null
+          category?: string | null
           hex_code?: string | null
           id?: number
           name?: string
+          order_index?: number | null
         }
         Relationships: []
       }
@@ -293,7 +299,6 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
-          slug: string
           state: string | null
           tags: string[] | null
           updated_at: string
@@ -310,7 +315,6 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
-          slug: string
           state?: string | null
           tags?: string[] | null
           updated_at?: string
@@ -327,7 +331,6 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
-          slug?: string
           state?: string | null
           tags?: string[] | null
           updated_at?: string

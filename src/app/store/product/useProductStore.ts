@@ -18,6 +18,12 @@ interface ProductState {
   updateVariant: (variant: ProductVariant) => void;
   modalMode: "create" | "edit";
   changeModalMode: (mode: "create" | "edit") => void;
+
+  // reset all
+  resetStore: () => void;
+
+  // isLoading mutation
+  setIsLoading: (loading: boolean) => void;
 }
 interface ProductVariant {
   idx: number;
@@ -47,6 +53,7 @@ export const useProductStore = create<ProductState>()(
         isLoading: false,
         currentEditVariant: null,
         modalMode: "create",
+
         //*ACTIONS ABOUT SETTINGS
         toggleAiOptions: () =>
           set((state) => ({ aiOptionsEnabled: !state.aiOptionsEnabled })),
@@ -73,6 +80,15 @@ export const useProductStore = create<ProductState>()(
               v.idx === variant.idx ? variant : v
             ),
           })),
+        // reset all
+        resetStore: () =>
+          set(() => ({
+            variants: [],
+            isLoading: false,
+            currentEditVariant: null,
+            modalMode: "create",
+          })),
+        setIsLoading: (loading: boolean) => set(() => ({ isLoading: loading })),
       }),
       {
         name: "product-settings",

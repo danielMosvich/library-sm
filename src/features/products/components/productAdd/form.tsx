@@ -11,6 +11,8 @@ import TagsGenerator from "../../../../components/ai/TagsGenerator";
 import { useProductStore } from "../../../../app/store/product/useProductStore";
 import ModalVariant from "./modalVariant";
 import Icons from "../../../../components/Icons";
+import { toast } from "sonner";
+import { CreateProduct } from "../../../../models/products/CreateProduct";
 // Tipos para el modal de variantes
 // interface ProductAddFormProps {
 //   onSubmit?: (data: ProductFormData) => void;
@@ -65,6 +67,9 @@ export default function ProductAddForm() {
     changeModalMode,
     setCurrentEditVariant,
     modalMode,
+    resetStore,
+    isLoading,
+    setIsLoading,
   } = useProductStore();
 
   //*!Estados locales
@@ -97,12 +102,31 @@ export default function ProductAddForm() {
     setColors(data || []);
     // console.log(data);
   }
+  function resetForm() {
+    setValue("name", "");
+    setValue("brand", "generica");
+    setValue("category_id", "");
+    setValue("description", "");
+    setValue("image_url", "/images/no-image.webp");
+    setValue("tags", "");
+    setDefaultPrices({ cost_price: 0, sale_price: 0 });
+  }
   useEffect(() => {
     getColors();
   }, []);
 
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    console.log(data);
+  const onSubmit: SubmitHandler<IFormInput> = async (data) => {
+    setIsLoading(true);
+    const { ok, message } = await CreateProduct(data, variants);
+    if (ok) {
+      toast.success(message);
+      setIsLoading(false);
+      resetForm();
+      resetStore();
+    } else {
+      toast.error(message);
+      setIsLoading(false);
+    }
   };
   return (
     <>
@@ -444,7 +468,7 @@ export default function ProductAddForm() {
           <button
             type="submit"
             className="btn btn-primary"
-            // disabled={checkingProductName || isSubmitting}
+            disabled={isLoading}
           >
             Crear Producto
           </button>
