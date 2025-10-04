@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { Fragment, useState } from "react";
-import React from "react";
+import { Fragment, useEffect, useState } from "react";
+// import React from "react";
 import supabase from "../../../supabase/config";
 import type { Tables } from "../../../../database.types";
 import { useUiStore } from "../../../app/store/useUiStore";
 import { Link } from "react-router";
-import CategoryName from "../components/CategoryName";
+// import CategoryName from "../components/CategoryName";
 import { clsx } from "clsx";
 import {
   Menu,
@@ -18,12 +18,21 @@ import {
 } from "@headlessui/react";
 import { useBreadcrumbs } from "../../../hooks/useBreadcrumbs";
 import Icons from "../../../components/Icons";
+import ProductTable from "../components/productTable/ProductTable";
 
 type ProductWithVariants = Tables<"products"> & {
   variants: Tables<"product_variants">[];
   variants_count: number;
 };
-
+interface IColors {
+  id: number;
+  name: string;
+  alt_names: string[];
+  hex_code: string;
+  active: boolean;
+  order_index: number;
+  created_at: string;
+}
 async function fetchProductsPaginated({
   page,
   pageSize,
@@ -32,8 +41,11 @@ async function fetchProductsPaginated({
   pageSize: number;
 }): Promise<{ data: ProductWithVariants[]; total: number }> {
   const { data, error, count } = await supabase
-    .from("products")
-    .select("*, variants:product_variants(*)", { count: "exact" })
+    .from("products") // CAMBIO CLAVE AQUÍ: Selecciona color:colors(name, hex_code) dentro de product_variants
+    .select(
+      "*, variants:product_variants(*, color:colors(name, hex_code)), category:categories(name)",
+      { count: "exact" }
+    )
     .order("created_at", { ascending: false })
     .range((page - 1) * pageSize, page * pageSize - 1);
 
@@ -52,174 +64,191 @@ async function fetchProductsPaginated({
 }
 
 // Componente interno para mostrar variantes como tabla simulada
-function ProductVariantsTable({
-  variants,
-  productName,
-  productBrand,
-}: {
-  variants: Tables<"product_variants">[];
-  productName: string;
-  productBrand: string;
-}) {
-  if (variants.length === 0) {
-    return (
-      <tr>
-        <td colSpan={8} className="text-center py-4 text-gray-500 italic">
-          No hay variantes para este producto
-        </td>
-      </tr>
-    );
-  }
+// function ProductVariantsTable({
+//   variants,
+//   productName,
+//   productBrand,
+//   colors,
+// }: {
+//   variants: Tables<"product_variants">[];
+//   productName: string;
+//   productBrand: string;
+//   colors: IColors[];
+// }) {
+//   if (variants.length === 0) {
+//     return (
+//       <tr>
+//         <td colSpan={8} className="text-center py-4 text-gray-500 italic">
+//           No hay variantes para este producto
+//         </td>
+//       </tr>
+//     );
+//   }
 
-  return (
-    <tr className="">
-      <td colSpan={8} className="p-0">
-        <div className="bg-base-50  border-b border-base-content/30">
-          <table className="table table-sm w-full ">
-            <thead>
-              <tr className="">
-                <th className="border-r border-base-content/50"></th>
-                <th className="text-center">Imagen</th>
-                <th>Nombre Variante</th>
-                <th className="">Marca</th>
-                <th className="text-center">SKU</th>
-                <th className="text-center">Código</th>
-                <th className="text-center">P. Venta</th>
-                <th className="text-center">P. Compra</th>
-                <th className="text-center">Unidad</th>
-                <th className="text-center">Estado</th>
-                <th className="text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {variants.map((variant, index) => (
-                <tr key={variant.id} className="hover">
-                  <td className="border-r border-base-content/50 relative">
-                    <div className="btn btn-square btn-info btn-xs absolute top-1/3 -right-3 font-black">
-                      {index + 1}
-                    </div>
-                  </td>
+//   return (
+//     <tr className="">
+//       <td colSpan={8} className="p-0">
+//         <div className="bg-base-50  border-b border-base-content/30">
+//           <table className="table table-sm w-full ">
+//             <thead>
+//               <tr className="">
+//                 <th className="border-r border-base-content/50"></th>
+//                 <th className="text-center">Imagen</th>
+//                 <th>Nombre Variante</th>
+//                 <th className="">Marca</th>
+//                 <th className="text-center">SKU</th>
+//                 <th className="text-center">Código</th>
+//                 <th className="text-center">P. Venta</th>
+//                 <th className="text-center">P. Compra</th>
+//                 <th className="text-center">Unidad</th>
+//                 <th className="text-center">Estado</th>
+//                 <th className="text-center">Acciones</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {variants.map((variant, index) => (
+//                 <tr key={variant.id} className="hover">
+//                   <td className="border-r border-base-content/50 relative">
+//                     <div className="btn btn-square btn-info btn-xs absolute top-1/3 -right-3 font-black">
+//                       {index + 1}
+//                     </div>
+//                   </td>
 
-                  <td className="text-center">
-                    <div className="w-10 h-10 rounded-lg overflow-hidden bg-white mx-auto">
-                      <img
-                        className="w-full h-full object-cover"
-                        src={
-                          variant.image_url
-                            ? variant.image_url
-                            : "/images/no-image.webp"
-                        }
-                        alt={variant.variant_name}
-                      />
-                    </div>
-                  </td>
+//                   <td className="text-center">
+//                     <div className="w-10 h-10 rounded-lg overflow-hidden bg-white mx-auto">
+//                       <img
+//                         className="w-full h-full object-cover"
+//                         src={
+//                           variant.image_url
+//                             ? variant.image_url
+//                             : "/images/no-image.webp"
+//                         }
+//                         alt={variant.unit}
+//                       />
+//                     </div>
+//                   </td>
 
-                  <td>
-                    <div className="text-sm">
-                      <div className="font-medium">
-                        {productName}{" "}
-                        <span className="text-primary font-bold">
-                          {variant.variant_name}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div>
-                      <div className="text-base text-secondary font-semibold line-clamp-2">
-                        {productBrand}
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="kbd w-full">{variant.sku}</div>
-                  </td>
+//                   <td>
+//                     <div className="text-sm">
+//                       <div className="font-medium">
+//                         {productName}{" "}
+//                         <span className="text-primary font-bold">
+//                           {variant.unit}{" "}
+//                         </span>
+//                         {variant.color_id && colors.length > 0 && (
+//                           <span
+//                             className="text-primary font-bold uppercase"
+//                             style={{
+//                               color: colors.find(
+//                                 (c) => c.id === variant.color_id
+//                               )?.hex_code,
+//                             }}
+//                           >
+//                             {
+//                               colors.find((c) => c.id === variant.color_id)
+//                                 ?.name
+//                             }
+//                           </span>
+//                         )}
+//                       </div>
+//                     </div>
+//                   </td>
+//                   <td>
+//                     <div>
+//                       <div className="text-base text-secondary font-semibold line-clamp-2">
+//                         {productBrand}
+//                       </div>
+//                     </div>
+//                   </td>
+//                   <td>
+//                     <div className="kbd w-full">{variant.sku}</div>
+//                   </td>
 
-                  <td>
-                    <div className="kbd w-full">{variant.barcode || "N/A"}</div>
-                  </td>
+//                   <td>
+//                     <div className="kbd w-full">{variant.barcode || "N/A"}</div>
+//                   </td>
 
-                  <td className="text-center">
-                    <div className="text-sm font-bold text-success">
-                      s/ {variant.sale_price.toFixed(2)}
-                    </div>
-                  </td>
-                  <td className="text-center">
-                    <div className="text-sm font-bold text-warning">
-                      s/ {variant.cost_price.toFixed(2)}
-                    </div>
-                  </td>
+//                   <td className="text-center">
+//                     <div className="text-sm font-bold text-success">
+//                       s/ {variant.sale_price.toFixed(2)}
+//                     </div>
+//                   </td>
+//                   <td className="text-center">
+//                     <div className="text-sm font-bold text-warning">
+//                       s/ {variant.cost_price.toFixed(2)}
+//                     </div>
+//                   </td>
 
-                  <td className="text-center">
-                    <div className="kbd whitespace-nowrap">
-                      {variant.exchange_rate} UN
-                    </div>
-                  </td>
+//                   <td className="text-center">
+//                     <div className="kbd whitespace-nowrap">
+//                       {variant.exchange_rate} UN
+//                     </div>
+//                   </td>
 
-                  <td className="text-center">
-                    <div
-                      className={clsx("badge font-black badge-sm", {
-                        "badge-success": variant.active,
-                        "badge-error": !variant.active,
-                      })}
-                    >
-                      {variant.active ? "Activo" : "Inactivo"}
-                    </div>
-                  </td>
+//                   <td className="text-center">
+//                     <div
+//                       className={clsx("badge font-black badge-sm", {
+//                         "badge-success": variant.active,
+//                         "badge-error": !variant.active,
+//                       })}
+//                     >
+//                       {variant.active ? "Activo" : "Inactivo"}
+//                     </div>
+//                   </td>
 
-                  <td>
-                    <div className="flex gap-1 justify-center">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-soft btn-warning"
-                        title="Editar variante"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="0.8rem"
-                          height="0.8rem"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z"
-                          />
-                        </svg>
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-soft btn-error"
-                        title="Eliminar variante"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="0.8rem"
-                          height="0.8rem"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            fill="currentColor"
-                            d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </td>
-    </tr>
-  );
-}
+//                   <td>
+//                     <div className="flex gap-1 justify-center">
+//                       <button
+//                         type="button"
+//                         className="btn btn-sm btn-soft btn-warning"
+//                         title="Editar variante"
+//                       >
+//                         <svg
+//                           xmlns="http://www.w3.org/2000/svg"
+//                           width="0.8rem"
+//                           height="0.8rem"
+//                           viewBox="0 0 24 24"
+//                         >
+//                           <path
+//                             fill="currentColor"
+//                             d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.996.996 0 0 0-1.41 0l-1.83 1.83l3.75 3.75l1.83-1.83z"
+//                           />
+//                         </svg>
+//                       </button>
+//                       <button
+//                         type="button"
+//                         className="btn btn-sm btn-soft btn-error"
+//                         title="Eliminar variante"
+//                       >
+//                         <svg
+//                           xmlns="http://www.w3.org/2000/svg"
+//                           width="0.8rem"
+//                           height="0.8rem"
+//                           viewBox="0 0 24 24"
+//                         >
+//                           <path
+//                             fill="currentColor"
+//                             d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"
+//                           />
+//                         </svg>
+//                       </button>
+//                     </div>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+//       </td>
+//     </tr>
+//   );
+// }
 
 export default function Products() {
   const productsPageSize = useUiStore((s) => s.productsPageSize);
+  const [colors, setColors] = useState<IColors[] | null>(null);
   const [page, setPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
-
   // Configurar breadcrumbs para la página de productos
   useBreadcrumbs([
     { label: "Inicio", href: "/", icon: <Icons variant="home" /> },
@@ -241,19 +270,19 @@ export default function Products() {
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / productsPageSize);
 
-  const toggleRowExpansion = (productId: string) => {
-    setExpandedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(productId)) {
-        newSet.delete(productId);
-      } else {
-        newSet.add(productId);
-      }
-      return newSet;
-    });
-  };
+  // const toggleRowExpansion = (productId: string) => {
+  //   setExpandedRows((prev) => {
+  //     const newSet = new Set(prev);
+  //     if (newSet.has(productId)) {
+  //       newSet.delete(productId);
+  //     } else {
+  //       newSet.add(productId);
+  //     }
+  //     return newSet;
+  //   });
+  // };
 
-  const isRowExpanded = (productId: string) => expandedRows.has(productId);
+  // const isRowExpanded = (productId: string) => expandedRows.has(productId);
 
   const goToPreviousPage = () => {
     setPage((currentPage) => Math.max(1, currentPage - 1));
@@ -262,7 +291,17 @@ export default function Products() {
   const goToNextPage = () => {
     setPage((currentPage) => Math.min(totalPages, currentPage + 1));
   };
-
+  const getColors = async () => {
+    const { data, error } = await supabase.from("colors").select("*");
+    if (error) {
+      console.error("Error fetching colors:", error);
+    } else {
+      setColors(data);
+    }
+  };
+  useEffect(() => {
+    getColors();
+  }, []);
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-8 space-y-3">
@@ -415,7 +454,7 @@ export default function Products() {
         </div>
       </div>
       {/* table */}
-      <div className="overflow-x-auto rounded-box border border-base-content/30 bg-base-100">
+      {/* <div className="overflow-x-auto rounded-box border border-base-content/30 bg-base-100">
         <table className="table w-full">
           <thead>
             <tr className="bg-base-200 border-base-content/30">
@@ -584,8 +623,9 @@ export default function Products() {
                 </tr>
 
                 {/* Variantes expandidas */}
-                {isRowExpanded(product.id) && (
+      {/* {isRowExpanded(product.id) && (
                   <ProductVariantsTable
+                    colors={colors || []}
                     variants={product.variants}
                     productName={product.name}
                     productBrand={product.brand}
@@ -595,8 +635,8 @@ export default function Products() {
             ))}
           </tbody>
         </table>
-      </div>
-
+      </div> */}
+      <ProductTable data={data} />
       {/* Paginación */}
       <div className="flex flex-row justify-end items-center gap-4 fixed bottom-5 right-5 bg-base-200 border border-base-content/30 z-30 h-fit rounded-field pl-2">
         <div className="text-sm text-gray-600">

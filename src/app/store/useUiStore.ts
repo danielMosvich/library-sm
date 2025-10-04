@@ -41,7 +41,7 @@ interface UiState {
 export const useUiStore = create<UiState>()(
   persist(
     (set) => ({
-      productsPageSize: 5, // valor inicial
+      productsPageSize: 6, // valor inicial
       isSidebarOpen: true,
       breadcrumbs: [],
       currentTheme:

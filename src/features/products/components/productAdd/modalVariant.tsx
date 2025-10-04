@@ -15,7 +15,6 @@ interface IFormInput {
   cost_price: number;
   sale_price: number | null;
   image_url: string;
-  hasInventory: boolean;
   inventoryStock: number;
   inventoryMinStock: number;
   inventoryLocationId: string | null;
@@ -49,8 +48,7 @@ export default function ModalVariant({
       sale_price: 0,
       image_url: "/images/no-image.webp",
 
-      hasInventory: false,
-      inventoryStock: 1,
+      inventoryStock: 0,
       inventoryMinStock: 1,
       inventoryLocationId: "",
       inventorySection: "",
@@ -73,8 +71,7 @@ export default function ModalVariant({
     setValue("cost_price", 0);
     setValue("sale_price", 0);
     setValue("image_url", "/images/no-image.webp");
-    setValue("hasInventory", false);
-    setValue("inventoryStock", 1);
+    setValue("inventoryStock", 0);
     setValue("inventoryMinStock", 1);
     setValue("inventoryLocationId", "");
     setValue("inventorySection", "");
@@ -145,7 +142,6 @@ export default function ModalVariant({
         cost_price: data.cost_price,
         sale_price: data.sale_price || 0,
 
-        hasInventory: data.hasInventory,
         stock: data.inventoryStock,
         min_stock: data.inventoryMinStock || 0,
         location_id: data.inventoryLocationId || null,
@@ -163,8 +159,7 @@ export default function ModalVariant({
           cost_price: defaultPricesEnabled ? defaultPrices.cost_price : 0,
           sale_price: defaultPricesEnabled ? defaultPrices.sale_price : 0,
           image_url: defaultImage || "/images/no-image.webp",
-          hasInventory: false,
-          inventoryStock: 1,
+          inventoryStock: 0,
           inventoryMinStock: 1,
           inventoryLocationId: "",
           inventorySection: "",
@@ -189,7 +184,6 @@ export default function ModalVariant({
         cost_price: data.cost_price,
         sale_price: data.sale_price || 0,
 
-        hasInventory: data.hasInventory,
         stock: data.inventoryStock,
         min_stock: data.inventoryMinStock || 0,
         location_id: data.inventoryLocationId || null,
@@ -349,7 +343,7 @@ export default function ModalVariant({
           </div>
 
           {/* SECCIÓN DE INVENTARIO */}
-          <div className="divider">Inventario</div>
+          {/* <div className="divider">Inventario</div>
 
           <div className="form-control">
             <label className="label cursor-pointer">
@@ -362,85 +356,83 @@ export default function ModalVariant({
                 {...register("hasInventory")}
               />
             </label>
-          </div>
+          </div> */}
 
-          {watch("hasInventory") && (
-            <div className="space-y-4 mt-4">
-              <div className="grid grid-cols-2 gap-2 md:gap-4">
-                <fieldset className="fieldset w-full">
-                  <label className="fieldset-label">Stock Inicial</label>
-                  <input
-                    type="number"
-                    className="input w-full"
-                    min="1"
-                    step="1"
-                    placeholder="0"
-                    {...register("inventoryStock", { valueAsNumber: true })}
-                    onFocus={(e) => {
-                      e.target.select();
-                    }}
-                  />
-                </fieldset>
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-2 md:gap-4">
+              <fieldset className="fieldset w-full">
+                <label className="fieldset-label">Stock Actual</label>
+                <input
+                  type="number"
+                  className="input w-full"
+                  min="0"
+                  step="1"
+                  placeholder="0"
+                  {...register("inventoryStock", { valueAsNumber: true })}
+                  onFocus={(e) => {
+                    e.target.select();
+                  }}
+                />
+              </fieldset>
 
-                <fieldset className="fieldset w-full">
-                  <label className="fieldset-label">Stock Mínimo</label>
-                  <input
-                    type="number"
-                    className="input w-full"
-                    min="1"
-                    step="1"
-                    placeholder="0"
-                    {...register("inventoryMinStock", { valueAsNumber: true })}
-                    onFocus={(e) => {
-                      e.target.select();
-                    }}
-                  />
-                </fieldset>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2 md:gap-4">
-                <fieldset className="fieldset w-full">
-                  <label className="fieldset-label">Ubicación</label>
-                  {locations && (
-                    <select
-                      className="select select-bordered w-full"
-                      {...register("inventoryLocationId")}
-                    >
-                      <option value="">Seleccionar ubicación</option>
-                      {locations.map((location) => (
-                        <option key={location.id} value={location.id}>
-                          {location.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  {isLoading && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Cargando ubicaciones...
-                    </div>
-                  )}
-                </fieldset>
-              </div>
-
-              <div className="grid grid-cols-1 gap-2 md:gap-4">
-                <fieldset className="fieldset w-full">
-                  <label className="fieldset-label">Sección (Opcional)</label>
-                  <input
-                    type="text"
-                    className="input w-full"
-                    placeholder="Ej: Estante A, Pasillo 3, etc."
-                    {...register("inventorySection")}
-                    // onChange={(e) =>
-                    //   handleNewVariantChange(
-                    //     "inventorySection",
-                    //     e.target.value
-                    //   )
-                    // }
-                  />
-                </fieldset>
-              </div>
+              <fieldset className="fieldset w-full">
+                <label className="fieldset-label">Stock Mínimo</label>
+                <input
+                  type="number"
+                  className="input w-full"
+                  min="1"
+                  step="1"
+                  placeholder="0"
+                  {...register("inventoryMinStock", { valueAsNumber: true })}
+                  onFocus={(e) => {
+                    e.target.select();
+                  }}
+                />
+              </fieldset>
             </div>
-          )}
+
+            <div className="grid grid-cols-1 gap-2 md:gap-4">
+              <fieldset className="fieldset w-full">
+                <label className="fieldset-label">Ubicación</label>
+                {locations && (
+                  <select
+                    className="select select-bordered w-full"
+                    {...register("inventoryLocationId")}
+                  >
+                    <option value="">Seleccionar ubicación</option>
+                    {locations.map((location) => (
+                      <option key={location.id} value={location.id}>
+                        {location.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {isLoading && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    Cargando ubicaciones...
+                  </div>
+                )}
+              </fieldset>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2 md:gap-4">
+              <fieldset className="fieldset w-full">
+                <label className="fieldset-label">Sección (Opcional)</label>
+                <input
+                  type="text"
+                  className="input w-full"
+                  placeholder="Ej: Estante A, Pasillo 3, etc."
+                  {...register("inventorySection")}
+                  // onChange={(e) =>
+                  //   handleNewVariantChange(
+                  //     "inventorySection",
+                  //     e.target.value
+                  //   )
+                  // }
+                />
+              </fieldset>
+            </div>
+          </div>
         </div>
 
         <div className="modal-action">

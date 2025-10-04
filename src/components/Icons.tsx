@@ -11,8 +11,11 @@ type variant =
   | "up"
   | "ai"
   | "right"
+  | "trash"
   | "edit"
   | "close"
+  | "document"
+  | "tags"
   | "logout";
 export default function Icons({
   variant,
@@ -262,6 +265,56 @@ export default function Icons({
               d="M11.293 9.464a1 1 0 0 1 1.414 0l2.829 2.829A1 1 0 0 1 14.828 14H9.172a1 1 0 0 1-.708-1.707z"
             />
           </g>
+        </svg>
+      );
+    case "tags":
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={defaultWidth}
+          height={defaultHeight}
+          className={className}
+          viewBox="0 0 576 512"
+        >
+          <path
+            fill="currentColor"
+            d="m401.2 39.1l148.2 150.3c27.7 28.1 27.7 73.1 0 101.2L393 448.9c-9.3 9.4-24.5 9.5-33.9.2s-9.5-24.5-.2-33.9l156.4-158.4c9.2-9.3 9.2-24.4 0-33.7L367 72.9c-9.3-9.4-9.2-24.6.2-33.9s24.6-9.2 33.9.2zM32.1 229.5V96c0-35.3 28.7-64 64-64h133.5c17 0 33.3 6.7 45.3 18.7l144 144c25 25 25 65.5 0 90.5L285.4 418.7c-25 25-65.5 25-90.5 0l-144-144c-12-12-18.7-28.3-18.7-45.3zm144-85.5a32 32 0 1 0-64 0a32 32 0 1 0 64 0"
+          />
+        </svg>
+      );
+    case "document":
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={defaultWidth}
+          height={defaultHeight}
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="currentColor"
+            fillRule="evenodd"
+            d="M4.172 3.172C3 4.343 3 6.229 3 10v4c0 3.771 0 5.657 1.172 6.828S7.229 22 11 22h2c3.771 0 5.657 0 6.828-1.172S21 17.771 21 14v-4c0-3.771 0-5.657-1.172-6.828S16.771 2 13 2h-2C7.229 2 5.343 2 4.172 3.172M7.25 8A.75.75 0 0 1 8 7.25h8a.75.75 0 0 1 0 1.5H8A.75.75 0 0 1 7.25 8m0 4a.75.75 0 0 1 .75-.75h8a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1-.75-.75M8 15.25a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5z"
+            clipRule="evenodd"
+          />
+        </svg>
+      );
+    case "trash":
+      return (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width={defaultWidth}
+          height={defaultHeight}
+          className={className}
+          viewBox="0 0 512 512"
+        >
+          <path
+            fill="none"
+            d="M296 64h-80a7.91 7.91 0 0 0-8 8v24h96V72a7.91 7.91 0 0 0-8-8"
+          />
+          <path
+            fill="currentColor"
+            d="M432 96h-96V72a40 40 0 0 0-40-40h-80a40 40 0 0 0-40 40v24H80a16 16 0 0 0 0 32h17l19 304.92c1.42 26.85 22 47.08 48 47.08h184c26.13 0 46.3-19.78 48-47l19-305h17a16 16 0 0 0 0-32M192.57 416H192a16 16 0 0 1-16-15.43l-8-224a16 16 0 1 1 32-1.14l8 224A16 16 0 0 1 192.57 416M272 400a16 16 0 0 1-32 0V176a16 16 0 0 1 32 0Zm32-304h-96V72a7.91 7.91 0 0 1 8-8h80a7.91 7.91 0 0 1 8 8Zm32 304.57A16 16 0 0 1 320 416h-.58A16 16 0 0 1 304 399.43l8-224a16 16 0 1 1 32 1.14Z"
+          />
         </svg>
       );
     case "edit":

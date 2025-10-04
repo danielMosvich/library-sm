@@ -21,10 +21,9 @@ interface CreateVariant {
   cost_price: number;
   sale_price: number;
 
-  hasInventory: boolean;
-  stock: number;
+  stock?: number;
   min_stock: number;
-  location_id: string | null;
+  location_id: string;
   section: string | null;
 }
 interface CreateProduct {
@@ -51,8 +50,11 @@ export async function CreateProduct(
   if (product.brand.trim().length === 0) {
     return returnError("La marca del producto no puede estar vacía");
   }
+  if (variants.length === 0) {
+    return returnError("Debe agregar al menos una variante al producto");
+  }
   if (!variants.find((v) => v.exchange_rate === 1)) {
-    return returnError("Debe haber al menos una variante con tasa de cambio 1");
+    return returnError("Debe haber un producto con la unidad minima (1)");
   }
 
   // Generar todos los SKUs de forma optimizada
@@ -131,34 +133,67 @@ export async function CreateProduct(
   });
 
   // Crear registros de inventario para variantes que tengan hasInventory: true
-  const inventoryRecords = [];
+  const stock_config_items = [];
+  const stock_movement_items = [];
   for (const variant of variants) {
-    if (variant.hasInventory && variant.location_id) {
+    // CRÍTICO: location_id es el ancla para la gestión y configuración
+    if (variant.location_id) {
       const variantSku = skusMap.get(variant.idx);
       const variantId = skuToVariantId.get(variantSku);
 
       if (variantId) {
-        inventoryRecords.push({
+        // 1. CREACIÓN DE CONFIGURACIÓN (stock_config): SE HACE PARA CUALQUIER VARIANTE CON UBICACIÓN.
+        // Esto asegura que tengas reglas (min_stock, section) para la Unidad, la Caja, el Paquete, etc.
+        stock_config_items.push({
           product_variant_id: variantId,
-          stock: variant.stock,
-          min_stock: variant.min_stock,
           location_id: variant.location_id,
+          min_stock: variant.min_stock,
           section: variant.section,
           status: "active",
         });
+
+        // 2. CREACIÓN DE MOVIMIENTO INICIAL (stock_movements): SOLO SI HAY STOCK > 0
+        if (variant.stock && variant.stock > 0) {
+          // !!! CORRECCIÓN CRÍTICA: Multiplicar el stock ingresado por el factor de conversión !!!
+          // Esto convierte "10 Cajas" a "60 Unidades Base".
+          const baseQuantity = variant.stock * variant.exchange_rate;
+
+          stock_movement_items.push({
+            product_variant_id: variantId,
+            location_id: variant.location_id,
+            // La cantidad SIEMPRE se registra en la Unidad Base (exchange_rate=1)
+            quantity: baseQuantity,
+            reason: "INVENTARIO_INICIAL",
+            movement_type: "IN",
+            document_ref: "CREACION_PRODUCTO",
+          });
+        }
       }
     }
   }
 
   // Insertar registros de inventario si hay alguno
-  if (inventoryRecords.length > 0) {
-    const { error: inventoryError } = await supabase
-      .from("inventory")
-      .insert(inventoryRecords);
+  if (stock_config_items.length > 0) {
+    const { error: stockConfigError } = await supabase
+      .from("stock_config")
+      .insert(stock_config_items);
 
-    if (inventoryError) {
+    if (stockConfigError) {
       return returnError(
-        "Error al crear los registros de inventario: " + inventoryError.message
+        "Error al crear los registros de inventario: " +
+          stockConfigError.message
+      );
+    }
+  }
+
+  if (stock_movement_items.length > 0) {
+    const { error: stockMovementError } = await supabase
+      .from("stock_movements")
+      .insert(stock_movement_items);
+    if (stockMovementError) {
+      return returnError(
+        "Error al crear los movimientos de inventario: " +
+          stockMovementError.message
       );
     }
   }
@@ -182,12 +217,12 @@ export function CreateVariant(variant: CreateVariant): {
     barcode: variant.barcode || null,
     cost_price: variant.cost_price,
     sale_price: variant.sale_price,
-    hasInventory: variant.hasInventory,
-    stock: Number(variant.hasInventory) ? variant.stock : 0,
-    min_stock: Number(variant.hasInventory) ? variant.min_stock : 0,
-    location_id: variant.location_id || null,
+    stock: variant.stock || 0,
+    min_stock: variant.min_stock || 1,
+    location_id: variant.location_id,
     section: variant.section || null,
   };
+  console.log(newVariant);
   return {
     ok: true,
     message: "Variante agregada",

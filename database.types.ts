@@ -94,60 +94,6 @@ export type Database = {
         }
         Relationships: []
       }
-      inventory: {
-        Row: {
-          created_at: string
-          id: string
-          location_id: string
-          min_stock: number
-          product_variant_id: string
-          section: string | null
-          status: string | null
-          stock: number
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          location_id?: string
-          min_stock?: number
-          product_variant_id?: string
-          section?: string | null
-          status?: string | null
-          stock?: number
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          location_id?: string
-          min_stock?: number
-          product_variant_id?: string
-          section?: string | null
-          status?: string | null
-          stock?: number
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inventory_location_id_fkey"
-            columns: ["location_id"]
-            isOneToOne: false
-            referencedRelation: "locations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "inventory_product_variant_id_fkey"
-            columns: ["product_variant_id"]
-            isOneToOne: false
-            referencedRelation: "product_variants"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       locations: {
         Row: {
           active: boolean
@@ -365,15 +311,207 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_config: {
+        Row: {
+          created_at: string
+          id: string
+          location_id: string
+          min_stock: number
+          product_variant_id: string
+          section: string | null
+          status: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          min_stock?: number
+          product_variant_id?: string
+          section?: string | null
+          status?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location_id?: string
+          min_stock?: number
+          product_variant_id?: string
+          section?: string | null
+          status?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_consolidated_view"
+            referencedColumns: ["variant_id"]
+          },
+          {
+            foreignKeyName: "inventory_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_config_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_movements: {
+        Row: {
+          created_at: string | null
+          document_ref: string | null
+          id: string
+          location_id: string
+          movement_date: string | null
+          movement_type: Database["public"]["Enums"]["movement_type"]
+          product_variant_id: string
+          quantity: number
+          reason: Database["public"]["Enums"]["reasons"]
+        }
+        Insert: {
+          created_at?: string | null
+          document_ref?: string | null
+          id?: string
+          location_id?: string
+          movement_date?: string | null
+          movement_type?: Database["public"]["Enums"]["movement_type"]
+          product_variant_id?: string
+          quantity?: number
+          reason: Database["public"]["Enums"]["reasons"]
+        }
+        Update: {
+          created_at?: string | null
+          document_ref?: string | null
+          id?: string
+          location_id?: string
+          movement_date?: string | null
+          movement_type?: Database["public"]["Enums"]["movement_type"]
+          product_variant_id?: string
+          quantity?: number
+          reason?: Database["public"]["Enums"]["reasons"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_consolidated_view"
+            referencedColumns: ["variant_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      current_inventory: {
+        Row: {
+          current_stock: number | null
+          location_id: string | null
+          product_variant_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_consolidated_view"
+            referencedColumns: ["variant_id"]
+          },
+          {
+            foreignKeyName: "stock_movements_product_variant_id_fkey"
+            columns: ["product_variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_consolidated_view: {
+        Row: {
+          active: boolean | null
+          barcode: string | null
+          base_product_id: string | null
+          base_product_image_url: string | null
+          brand: string | null
+          category_name: string | null
+          color_name: number | null
+          cost_price: number | null
+          current_stock_base: number | null
+          current_stock_sellable: number | null
+          exchange_rate: number | null
+          location_name: string | null
+          min_stock: number | null
+          product_name: string | null
+          sale_price: number | null
+          section: string | null
+          sku: string | null
+          unit_of_sale_name: string | null
+          variant_id: string | null
+          variant_image_url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produc_variants_base_product_id_fkey"
+            columns: ["base_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_color_id_fkey"
+            columns: ["color_name"]
+            isOneToOne: false
+            referencedRelation: "colors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      movement_type: "IN" | "OUT"
+      reasons:
+        | "COMPRA"
+        | "VENTA"
+        | "AJUSTE"
+        | "MERMA"
+        | "TRANSFERENCIA"
+        | "INVENTARIO_INICIAL"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -500,6 +638,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      movement_type: ["IN", "OUT"],
+      reasons: [
+        "COMPRA",
+        "VENTA",
+        "AJUSTE",
+        "MERMA",
+        "TRANSFERENCIA",
+        "INVENTARIO_INICIAL",
+      ],
+    },
   },
 } as const

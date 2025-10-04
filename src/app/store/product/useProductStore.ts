@@ -35,7 +35,6 @@ interface ProductVariant {
   cost_price: number;
   sale_price: number;
 
-  hasInventory: boolean;
   stock: number;
   min_stock: number;
   location_id: string | null;

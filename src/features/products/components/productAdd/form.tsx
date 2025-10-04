@@ -468,7 +468,7 @@ export default function ProductAddForm() {
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={isLoading}
+            disabled={isLoading || variants.length === 0}
           >
             Crear Producto
           </button>
